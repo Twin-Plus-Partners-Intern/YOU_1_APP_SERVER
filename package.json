@@ -1,0 +1,30 @@
+{
+  "name": "smartscheduling",
+  "version": "1.0.0",
+  "description": "Backend foundation for the SmartScheduling service.",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/app.js && node --check src/server.js && node --check src/config/database.js && node --check src/config/env.js && node --check src/models/index.js && node --check src/modules/index.js && node --check src/modules/auth/auth.routes.js && node --check src/modules/auth/auth.controller.js && node --check src/modules/auth/auth.service.js && node --check src/modules/auth/auth.validation.js && node --check src/modules/auth/session.model.js && node --check src/modules/auth/otp.service.js && node --check src/modules/auth/email.service.js && node --check src/modules/auth/otp-verification.model.js && node --check src/modules/users/user.model.js && node --check src/core/middlewares/auth.middleware.js && node --check src/core/middlewares/error.middleware.js && node --check src/core/middlewares/validate.middleware.js && node --check src/core/utils/response.js",
+    "test": "node --test --test-reporter=spec"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "pg": "^8.22.0",
+    "pg-hstore": "^2.3.4",
+    "resend": "^6.18.1",
+    "sequelize": "^6.37.8"
+  }
+}
