@@ -1,7 +1,7 @@
 {
-  "name": "smartscheduling",
+  "name": "you-il",
   "version": "1.0.0",
-  "description": "Backend foundation for the SmartScheduling service.",
+  "description": "Backend foundation for the You-il service.",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
@@ -22,9 +22,9 @@
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
+    "nodemailer": "^9.0.5",
     "pg": "^8.22.0",
     "pg-hstore": "^2.3.4",
-    "resend": "^6.18.1",
     "sequelize": "^6.37.8"
   }
 }
