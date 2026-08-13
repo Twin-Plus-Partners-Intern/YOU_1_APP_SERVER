@@ -17,9 +17,9 @@ async function connectDatabase() {
   await sequelize.authenticate();
 
   if (env.NODE_ENV === "development") {
-    
+    await sequelize.sync({ alter: true });
   } else {
-    
+    await sequelize.sync();
   }
 
   return "connected";
