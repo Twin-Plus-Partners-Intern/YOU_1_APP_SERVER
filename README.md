@@ -102,6 +102,72 @@ npm test
 
 Sau khi khởi động, server mặc định ở `http://localhost:3000`.
 
+## Chạy bằng Docker Compose
+
+Docker Compose development khởi chạy ba service: PostgreSQL, backend Express và Nginx reverse proxy. Backend không publish trực tiếp port `3000`; request đi qua Nginx ở port `80`.
+
+Yêu cầu Docker Desktop hoặc Docker Engine có hỗ trợ `docker compose`.
+
+```bash
+docker compose -f docker-compose.dev.yml up -d --build
+```
+
+Kiểm tra trạng thái service:
+
+```bash
+docker compose -f docker-compose.dev.yml ps
+```
+
+Sau khi các service ở trạng thái `healthy` hoặc `running`, kiểm tra API qua Nginx:
+
+```bash
+curl http://localhost/health
+```
+
+PowerShell:
+
+```powershell
+Invoke-WebRequest http://localhost/health
+```
+
+Trong Compose, backend phải dùng `DB_HOST=postgres` vì `postgres` là tên service trong Docker network, không dùng `localhost`. Các giá trị `DB_NAME`, `DB_USER`, `DB_PASSWORD`, JWT, email và OTP có thể đặt trong file `.env`; Compose sẽ dùng giá trị mặc định development nếu các biến database chưa được khai báo.
+
+Dừng và xóa container:
+
+```bash
+docker compose -f docker-compose.dev.yml down
+```
+
+Xem log toàn bộ service:
+
+```bash
+docker compose -f docker-compose.dev.yml logs -f
+```
+
+Xem log riêng backend hoặc PostgreSQL:
+
+```bash
+docker compose -f docker-compose.dev.yml logs --tail=100 backend
+docker compose -f docker-compose.dev.yml logs --tail=100 postgres
+```
+
+Kiểm tra mã nguồn và test bên trong container:
+
+```bash
+docker compose -f docker-compose.dev.yml exec backend npm run check
+docker compose -f docker-compose.dev.yml exec backend npm test
+```
+
+Nếu gặp lỗi, kiểm tra theo thứ tự: `docker compose ... ps`, log của service lỗi, sau đó kiểm tra biến môi trường trong `.env`. Không dùng `DB_HOST=localhost` cho backend trong Compose; phải dùng `DB_HOST=postgres`.
+
+Muốn xóa cả dữ liệu PostgreSQL development:
+
+```bash
+docker compose -f docker-compose.dev.yml down -v
+```
+
+Docker image chạy process bằng user không phải root và có healthcheck nội bộ tại `/health`. Nginx hiện chỉ cấu hình HTTP development; TLS/Certbot và domain thật chưa được cấu hình cho staging/production.
+
 ## Database
 
 Server chỉ kết nối PostgreSQL khi cả `DB_NAME`, `DB_USER` và `DB_HOST` được cấu hình. Nếu thiếu một trong các biến này, server vẫn khởi động nhưng các chức năng cần database sẽ không hoạt động.
@@ -132,6 +198,18 @@ API root:
 ```bash
 curl http://localhost:3000/api/v1/
 ```
+
+Khi chạy bằng Docker Compose, dùng `http://localhost/health` thay cho port `3000` vì backend chỉ được truy cập nội bộ qua Nginx. Nginx chỉ chuyển tiếp các đường dẫn bắt đầu bằng `/api/`, nên base URL của API qua Docker là `http://localhost/api/v1`.
+
+## Trạng thái kiểm tra gần nhất
+
+- Docker Compose đã build và khởi động thành công PostgreSQL, backend và Nginx.
+- PostgreSQL và backend đều báo `healthy`; `/health` trả HTTP `200`.
+- Đã sửa healthcheck PostgreSQL để kiểm tra đúng database `DB_NAME`; trước đó healthcheck mặc định kiểm tra nhầm database `you_il` và tạo log `database "you_il" does not exist`.
+- `npm run check` chạy đạt.
+- `npm test` chạy đạt nhưng hiện chưa có test case (`0 tests`).
+- `npm install` báo 2 lỗ hổng mức moderate khi chạy `npm audit`.
+- SMTP mặc định chưa có `EMAIL_USER` và `EMAIL_PASSWORD`; cần cấu hình trước khi kiểm thử đăng ký/gửi OTP.
 
 ## API authentication
 
