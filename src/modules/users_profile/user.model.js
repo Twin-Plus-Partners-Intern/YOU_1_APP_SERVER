@@ -98,6 +98,18 @@ module.exports = (sequelize, DataTypes) => {
       as: "otpVerifications",
       onDelete: "CASCADE",
     });
+
+    User.hasOne(models.Streak, {
+      foreignKey: "user_id",
+      as: "streak",
+      onDelete: "CASCADE",
+    });
+
+    User.hasMany(models.StreakEntry, {
+      foreignKey: "user_id",
+      as: "streakEntries",
+      onDelete: "CASCADE",
+    });
   };
 
   User.prototype.toJSON = function toJSON() {
