@@ -1,13 +1,42 @@
+# Git metadata and local tooling
 .git
 .gitignore
+.vscode/
+.idea/
+
+# Environment files and secrets (allow placeholder template only)
 .env
 .env.*
 !.env.example
+!.env.*.example
+**/credentials.json
+**/service-account*.json
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jks
+**/*.keystore
+
+# Dependencies and generated output
 node_modules
-npm-debug.log
+coverage
+dist
+build
+.nyc_output
+.tmp
+
+# Logs and local data
+*.log
+npm-debug.log*
+data/
+pgdata/
+*.sqlite
+*.sqlite3
+*.db
+
+# Documentation and local compose config
 README.md
 *.md
-.vscode
-.idea
-Dockerfile
 docker-compose*.yml
+Dockerfile
