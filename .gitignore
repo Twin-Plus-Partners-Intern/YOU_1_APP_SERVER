@@ -1,9 +1,45 @@
+# Dependencies
 node_modules/
+
+# Environment files: allow only safe templates
 .env
+.env.*
+!.env.example
+!.env.*.example
+
+# Build and test output
 coverage/
 dist/
 build/
+.tmp/
+.nyc_output/
+
+# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local database / runtime data
+*.sqlite
+*.sqlite3
+*.db
+data/
+pgdata/
+
+# Certificates, private keys, and service credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.mobileprovision
+credentials.json
+service-account*.json
+
+# Local tooling and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
