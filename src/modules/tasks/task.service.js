@@ -86,6 +86,16 @@ class TaskService {
       }
       task.status = "completed";
       await task.save({ transaction });
+      const pendingTasks = await PlanTask.count({
+        where: { plan_day_id: task.plan_day_id, status: "pending" },
+        transaction,
+      });
+      if (pendingTasks === 0) {
+        await PlanDay.update(
+          { status: "completed" },
+          { where: { id: task.plan_day_id, status: "pending" }, transaction }
+        );
+      }
       return task;
     });
   }
