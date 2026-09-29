@@ -110,6 +110,12 @@ module.exports = (sequelize, DataTypes) => {
       as: "streakEntries",
       onDelete: "CASCADE",
     });
+
+    User.hasMany(models.Plan, {
+      foreignKey: "user_id",
+      as: "plans",
+      onDelete: "CASCADE",
+    });
   };
 
   User.prototype.toJSON = function toJSON() {
