@@ -150,7 +150,10 @@ class PlanningService {
     return sequelize.transaction(async (transaction) => {
       const day = await this._getOwnedPlanDay(userId, dayId, transaction);
       if (!day.plan || day.plan.status !== "active" || day.status !== "pending") {
-        throw new AppError(409, "Plan day can only be completed while the plan is active");
+        throw new AppError(409, "Plan day can only be completed when the plan is active and the day is pending", {
+          plan_status: day.plan?.status || null,
+          plan_day_status: day.status,
+        });
       }
       day.status = "completed";
       await day.save({ transaction });
@@ -243,6 +246,7 @@ class PlanningService {
       const plan = await this._getOwnedPlan(userId, planId, transaction);
       await this._assertDateAvailable(userId, planId, input.scheduled_date, transaction);
       const parts = this._getWeekPosition(plan.start_date, input.scheduled_date);
+      await this._assertPlanSlotAvailable(plan.id, parts, null, transaction);
       const { status, ...dayInput } = input;
       const day = await PlanDay.create({
         ...dayInput, plan_id: plan.id, week_num: parts.week_num, day_num: parts.day_num,

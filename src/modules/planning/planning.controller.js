@@ -51,7 +51,13 @@ class PlanningController {
     try { return successResponse(res, 200, { success: true, result: await planningService.reschedulePlanDay(req.user.id, req.params.id, req.body) }); } catch (error) { return next(error); }
   }
   async cancelPlanDay(req, res, next) {
-    try { return successResponse(res, 200, { success: true, day: await planningService.cancelPlanDay(req.user.id, req.params.id, req.body.fill_gap) }); } catch (error) { return next(error); }
+    try {
+      const fillGap = req.body?.fill_gap ?? false;
+      return successResponse(res, 200, {
+        success: true,
+        day: await planningService.cancelPlanDay(req.user.id, req.params.id, fillGap),
+      });
+    } catch (error) { return next(error); }
   }
 }
 
