@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const express = require("express");
 const { authenticate } = require("../../core/middlewares/auth.middleware");
 const { validate } = require("../../core/middlewares/validate.middleware");
 const controller = require("./planning.controller");
@@ -23,6 +24,12 @@ router.patch("/plan-days/:id", validate(validation.idParamSchema, "params"), val
 router.post("/plan-days/:id/complete", validate(validation.idParamSchema, "params"), controller.completePlanDay);
 router.delete("/plan-days/:id", validate(validation.idParamSchema, "params"), controller.deletePlanDay);
 router.post("/plan-days/:id/reschedule", validate(validation.idParamSchema, "params"), validate(validation.rescheduleSchema), controller.reschedulePlanDay);
-router.post("/plan-days/:id/cancel", validate(validation.idParamSchema, "params"), validate(validation.cancelSchema), controller.cancelPlanDay);
+router.post(
+  "/plan-days/:id/cancel",
+  express.json({ type: ["application/json", "text/plain"] }),
+  validate(validation.idParamSchema, "params"),
+  validate(validation.cancelSchema),
+  controller.cancelPlanDay
+);
 
 module.exports = router;

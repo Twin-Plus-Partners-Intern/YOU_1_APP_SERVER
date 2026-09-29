@@ -14,6 +14,17 @@ const errorHandler = (error, req, res, next) => {
     return errorResponse(res, error.statusCode, error.message, error.details);
   }
 
+  if (error.name === "SequelizeUniqueConstraintError") {
+    return errorResponse(
+      res,
+      409,
+      "The requested planning record conflicts with an existing record",
+      {
+        fields: error.fields || null,
+      }
+    );
+  }
+
   if (process.env.NODE_ENV !== "test") {
     console.error(error);
   }
