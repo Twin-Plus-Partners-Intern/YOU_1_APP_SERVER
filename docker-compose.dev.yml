@@ -1,0 +1,89 @@
+# docker-compose.dev.yml — YOU_1_APP_SERVER
+# Đặt tại thư mục gốc repo YOU_1_APP_SERVER
+# Chạy: docker compose -f docker-compose.dev.yml up
+#
+# Gồm: Nginx (reverse proxy) + Backend (Express) + PostgreSQL
+# KHÔNG có Redis (team quyết định — xem Phase 9 baseline)
+# KHÔNG có AI service (ai-team hoãn triển khai — thêm service khi có code, xem Phase 9B/13)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-you_il_dev}
+      POSTGRES_USER: ${DB_USER:-you_il}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_dev_only}
+    ports:
+      # Expose ra host để có thể dùng DBeaver/psql debug local — KHÔNG mở port này ở staging/production compose
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-you_il} -d ${DB_NAME:-you_il_dev}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - you-il-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_DIALECT: postgres
+      # DB_HOST = tên service Postgres trong network Docker, KHÔNG phải localhost khi chạy qua compose
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-you_il_dev}
+      DB_USER: ${DB_USER:-you_il}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme_dev_only}
+      DB_LOGGING: ${DB_LOGGING:-false}
+      JWT_SECRET: ${JWT_SECRET:-you-il-access-secret-change-me}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-45m}
+      JWT_REFRESH_EXPIRES_IN_DAYS: ${JWT_REFRESH_EXPIRES_IN_DAYS:-7}
+      COOKIE_CROSS_SITE: ${COOKIE_CROSS_SITE:-false}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_SECURE: ${EMAIL_SECURE:-true}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+      EMAIL_FROM_EMAIL: ${EMAIL_FROM_EMAIL:-no-reply@example.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-You-il}
+      OTP_EXPIRES_IN_MINUTES: ${OTP_EXPIRES_IN_MINUTES:-5}
+      OTP_MAX_ATTEMPTS: ${OTP_MAX_ATTEMPTS:-5}
+      OTP_RESEND_COOLDOWN_SECONDS: ${OTP_RESEND_COOLDOWN_SECONDS:-60}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - you-il-net
+    # Không publish port 3000 ra host — mọi traffic vào qua Nginx (đúng vai trò reverse proxy, xem Phase 12)
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # Port 443 chỉ cần khi test cert Let's Encrypt local — bỏ qua ở dev nếu chưa cần
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - you-il-net
+
+networks:
+  you-il-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
